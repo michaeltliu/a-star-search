@@ -66,8 +66,6 @@ movement_directions = [(1,0), (1,1), (0,1), (-1,1), (-1,0), (-1,-1), (0,-1), (1,
 running = True
 optimal_path = []
 
-# We are using a consistent heuristic (Euclidean distance) so we can omit a few steps from 
-# the typical A* search.
 while not q.empty():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -114,6 +112,6 @@ else:
         col = e % WIDTH
         screen.fill([0,255,0], pygame.Rect(col * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
         pygame.display.update()
-        pygame.time.delay(ANIMATION_DELAY)
+        pygame.time.delay(int(ANIMATION_DELAY/3))
 
 input("Press <RETURN> to exit")
