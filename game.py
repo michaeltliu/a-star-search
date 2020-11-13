@@ -4,7 +4,8 @@ from queue import PriorityQueue
 pygame.init()
 
 WIDTH_PIX, HEIGHT_PIX = 720, 720
-BLOCK_SIZE = 40
+BLOCK_SIZE = 10
+ANIMATION_DELAY = 100   # in milliseconds
 EPSILON = 1.1   # Heuristic weight. Default is 1. 
                 # Larger values reach target faster 
                 # at the cost of possibly continuing down a suboptimal path
@@ -58,8 +59,8 @@ q = PriorityQueue()
 # Arguments of the tuple in order: Node priority, cumulative distance of optimal path to node,
 # node number/location, list representing the path to node 
 q.put((0,0,0,[0]))
-visited = set()
-visited.add(0)
+distDict = dict()
+distDict[0] = 0
 
 movement_directions = [(1,0), (1,1), (0,1), (-1,1), (-1,0), (-1,-1), (0,-1), (1,-1)]
 running = True
@@ -79,7 +80,7 @@ while not q.empty():
 
     screen.fill([0,0,255], pygame.Rect(col * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
     pygame.display.update()
-    pygame.time.delay(200)
+    pygame.time.delay(ANIMATION_DELAY)
 
     if loc == WIDTH * HEIGHT - 1:
         optimal_path = path
@@ -93,12 +94,15 @@ while not q.empty():
         if not on_grid(ncol, nrow):
             continue
 
-        if nloc not in visited and nloc not in obstacles:
-            heuristic = magnitude((WIDTH - 1 - ncol, HEIGHT - 1 - nrow))
-            f_val = dist + magnitude(dir) + EPSILON * heuristic
-            npath = path + [nloc]
-            q.put((f_val, dist + magnitude(dir), nloc, npath))
-            visited.add(nloc)
+        if nloc not in obstacles:
+            ndist = dist + magnitude(dir)
+            if nloc not in distDict or ndist < distDict[nloc]:
+                distDict[nloc] = ndist
+
+                heuristic = magnitude((WIDTH - 1 - ncol, HEIGHT - 1 - nrow))
+                f_val = ndist + EPSILON * heuristic
+                npath = path + [nloc]
+                q.put((f_val, ndist, nloc, npath))
 
 if len(optimal_path) == 0:
     print("No path to target. Rerun program to try a new map.")
@@ -110,6 +114,6 @@ else:
         col = e % WIDTH
         screen.fill([0,255,0], pygame.Rect(col * BLOCK_SIZE, row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
         pygame.display.update()
-        pygame.time.delay(200)
+        pygame.time.delay(ANIMATION_DELAY)
 
 input("Press <RETURN> to exit")
